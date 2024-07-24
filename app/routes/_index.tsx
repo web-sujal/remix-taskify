@@ -16,8 +16,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+type Filter = "all" | "completed" | "pending" | "dueDate";
+
 export default function Index() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
 
   const handleDelete = (id: number) => {
     if (!confirm("Do you really want to delete this task?")) return;
@@ -35,6 +39,26 @@ export default function Index() {
     }
   }, []);
 
+  const filterTasks = (data: TaskType[], filterType: Filter) => {
+    switch (filterType) {
+      case "all":
+        return data;
+      case "completed":
+        return data.filter((item) => item.status === "completed");
+      case "pending":
+        return data.filter((item) => item.status === "pending");
+      case "dueDate":
+        return data.sort(
+          (a, b) =>
+            new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
+        );
+      default:
+        return [];
+    }
+  };
+
+  const filteredTasks = filterTasks(tasks, filter);
+
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
       {/* header */}
@@ -43,18 +67,58 @@ export default function Index() {
         description="Where actions meet expectations!"
       />
 
-      {/* CTA */}
-      <Link
-        to="/create"
-        className="rounded-md bg-rose-700 text-white px-4 py-3 hover:bg-rose-800 hover:-translate-y-0.5 transition drop-shadow-xl text-extrabold mx-auto"
-      >
-        Create Task
-      </Link>
+      {/* CTA, search and filters */}
+      <div className="flex justify-center w-full items-center space-x-10">
+        {/* search */}
+        <input
+          type="text"
+          className="input max-w-md"
+          placeholder="search your tasks by title or description..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+
+        {/* CTA */}
+        <Link
+          to="/create"
+          className="rounded-md text-nowrap bg-rose-700 text-white px-6 py-4 hover:bg-rose-800 hover:-translate-y-0.5 transition drop-shadow-xl text-extrabold mx-auto"
+        >
+          Create Task
+        </Link>
+
+        {/* filters */}
+        <div className="flex gap-x-4 items-center justify-between">
+          <button
+            className="filterBtn text-nowrap"
+            onClick={() => setFilter("all")}
+          >
+            All
+          </button>
+          <button
+            className="filterBtn text-nowrap"
+            onClick={() => setFilter("completed")}
+          >
+            Completed
+          </button>
+          <button
+            className="filterBtn text-nowrap"
+            onClick={() => setFilter("pending")}
+          >
+            Pending
+          </button>
+          <button
+            className="filterBtn text-nowrap"
+            onClick={() => setFilter("dueDate")}
+          >
+            Due Date
+          </button>
+        </div>
+      </div>
 
       {/* tasks list */}
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto scrollbar gap-y-6">
-        {tasks.length ? (
-          tasks.map((task) => (
+        {filteredTasks.length ? (
+          filteredTasks.map((task) => (
             <Task
               key={task.id}
               task={task}
