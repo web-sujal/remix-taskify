@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react";
 import { useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDelete } from "react-icons/md";
@@ -34,9 +35,12 @@ const Task = ({ task, handleDelete }: TaskProps) => {
           </p>
 
           <div className="hidden group-hover:flex items-center justify-between gap-x-2">
-            <button className="hover:-translate-y-0.5 transition">
+            <Link
+              to={`edit/${task.id}`}
+              className="hover:-translate-y-0.5 transition"
+            >
               <CiEdit size={25} />
-            </button>
+            </Link>
             <button
               className="hover:-translate-y-0.5 transition"
               onClick={() => handleDelete(task.id)}
