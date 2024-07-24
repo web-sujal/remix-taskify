@@ -53,7 +53,12 @@ export default function Index() {
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto scrollbar gap-y-6">
         {tasks.length ? (
           tasks.map((task) => (
-            <Task key={task.id} task={task} handleDelete={handleDelete} />
+            <Task
+              key={task.id}
+              task={task}
+              setTasks={setTasks}
+              handleDelete={handleDelete}
+            />
           ))
         ) : (
           <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">

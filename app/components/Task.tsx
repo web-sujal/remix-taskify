@@ -8,13 +8,31 @@ import { formatDate } from "~/utils";
 
 interface TaskProps {
   task: TaskType;
+  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
   handleDelete: (id: number) => void;
 }
 
-const Task = ({ task, handleDelete }: TaskProps) => {
+const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
   const [isCompleted, setIsCompleted] = useState(task.status === "completed");
 
-  const handleCheckChange = () => {};
+  const handleCheckChange = () => {
+    const newStatus = task.status === "completed" ? "pending" : "completed";
+    setIsCompleted(newStatus === "completed");
+
+    // fetching tasks form localStorage
+    const storedTasks = JSON.parse(
+      window.localStorage.getItem("tasks") || "[]"
+    );
+
+    const updatedTasks = storedTasks.map((item: TaskType) =>
+      item.id === task.id ? { ...item, status: newStatus } : item
+    );
+
+    setTasks(updatedTasks);
+
+    // updating localStorage
+    window.localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
 
   return (
     <div className="group flex w-full max-w-md bg-white gap-x-6 justify-between rounded-md items-center px-7 py-2">
