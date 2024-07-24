@@ -38,7 +38,18 @@ export default function Index() {
     }
   }, []);
 
-  const filteredTasks = filterTasks(tasks, filter);
+  const keys: (keyof Pick<TaskType, "title" | "description">)[] = [
+    "title",
+    "description",
+  ];
+
+  const search = (data: TaskType[]): TaskType[] => {
+    return data.filter((item) =>
+      keys.some((key) => item[key].toLowerCase().includes(query.toLowerCase()))
+    );
+  };
+
+  const filteredTasks = search(filterTasks(tasks, filter));
 
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
