@@ -9,14 +9,8 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import Header from "~/components/Header";
-import { getCurrentDate, isInvalidDueDate } from "~/utils";
-import { TaskType } from "~/types";
-
-interface ErrorsType {
-  title?: string;
-  description?: string;
-  dueDate?: string;
-}
+import { getCurrentDate, validateInputs } from "~/utils";
+import { ErrorsType, TaskType } from "~/types";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -25,20 +19,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const description = String(formData.get("description"));
   const dueDate = String(formData.get("dueDate"));
 
-  const errors: ErrorsType = {};
+  const errors: ErrorsType = validateInputs(title, description, dueDate);
   let newTask: TaskType | object = {};
-
-  if (title.length < 4) {
-    errors.title = "Title should be at least 4 characters";
-  }
-
-  if (description.length < 12) {
-    errors.description = "Description should be at least 12 characters";
-  }
-
-  if (isInvalidDueDate(dueDate)) {
-    errors.dueDate = "Due date cannot be a past date";
-  }
 
   if (Object.keys(errors).length > 0) {
     return json({ errors, newTask });
