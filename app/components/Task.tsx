@@ -9,7 +9,7 @@ const Task = ({ task }: { task: TaskType }) => {
   const [isCompleted, setIsCompleted] = useState(task.status === "completed");
 
   return (
-    <div className="flex bg-white gap-x-6 justify-between rounded-md items-center px-7 py-2">
+    <div className="flex w-full max-w-md bg-white gap-x-6 justify-between rounded-md items-center px-7 py-2">
       {/* checkbox */}
       <input type="checkbox" name="status" id="status" checked={isCompleted} />
 

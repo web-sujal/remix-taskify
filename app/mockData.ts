@@ -1,4 +1,6 @@
-export const tasks = [
+import { TaskType } from "./types";
+
+export const mockTasks: TaskType[] = [
   {
     id: 1,
     title: "Complete React assignment",

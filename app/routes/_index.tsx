@@ -2,7 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useState } from "react";
 import Task from "~/components/Task";
-import { TaskType } from "~/types";
+import { mockTasks } from "~/mockData";
 
 export const meta: MetaFunction = () => {
   return [
@@ -14,28 +14,8 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-const Tasks: TaskType[] = [
-  {
-    id: 1,
-    title: "Complete React assignment",
-    description: "Finish the React assignment for the interview process.",
-    createdAt: "2024-07-21T10:00:00Z",
-    dueDate: "2024-07-24T18:00:00Z",
-    status: "pending",
-  },
-  {
-    id: 2,
-    title: "Buy groceries",
-    description:
-      "Purchase vegetables, fruits, and other essentials for the week.",
-    createdAt: "2024-07-20T08:30:00Z",
-    dueDate: "2024-07-21T17:00:00Z",
-    status: "completed",
-  },
-];
-
 export default function Index() {
-  const [tasks, setTasks] = useState([1]);
+  const [tasks, setTasks] = useState(mockTasks);
 
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
@@ -58,9 +38,9 @@ export default function Index() {
       </Link>
 
       {/* tasks list */}
-      <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4">
+      <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto gap-y-6">
         {tasks.length ? (
-          <Task task={Tasks[1]} />
+          tasks.map((task) => <Task task={task} key={task.id} />)
         ) : (
           <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">
             Wow, such empty! <br />
