@@ -20,6 +20,8 @@ export default function Index() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
 
   const handleDelete = (id: number) => {
+    if (!confirm("Do you really want to delete this task?")) return;
+
     const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
 
