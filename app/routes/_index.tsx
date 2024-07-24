@@ -2,6 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useState } from "react";
 import Task from "~/components/Task";
+import { TaskType } from "~/types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,8 +14,28 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+const Tasks: TaskType[] = [
+  {
+    id: 1,
+    title: "Complete React assignment",
+    description: "Finish the React assignment for the interview process.",
+    createdAt: "2024-07-21T10:00:00Z",
+    dueDate: "2024-07-24T18:00:00Z",
+    status: "pending",
+  },
+  {
+    id: 2,
+    title: "Buy groceries",
+    description:
+      "Purchase vegetables, fruits, and other essentials for the week.",
+    createdAt: "2024-07-20T08:30:00Z",
+    dueDate: "2024-07-21T17:00:00Z",
+    status: "completed",
+  },
+];
+
 export default function Index() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([1]);
 
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
@@ -29,12 +50,17 @@ export default function Index() {
       </div>
 
       {/* CTA */}
-      <Link to="/create">Create Task</Link>
+      <Link
+        to="/create"
+        className="rounded-md bg-rose-700 text-white px-4 py-3 hover:bg-rose-800 hover:-translate-y-0.5 transition drop-shadow-xl text-extrabold mx-auto"
+      >
+        Create Task
+      </Link>
 
       {/* tasks list */}
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4">
         {tasks.length ? (
-          <Task />
+          <Task task={Tasks[1]} />
         ) : (
           <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">
             Wow, such empty! <br />
