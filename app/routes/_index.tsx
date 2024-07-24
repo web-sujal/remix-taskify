@@ -1,4 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
+import { Link } from "@remix-run/react";
+import { useState } from "react";
+import Task from "~/components/Task";
 
 export const meta: MetaFunction = () => {
   return [
@@ -11,6 +14,8 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const [tasks, setTasks] = useState([]);
+
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
       {/* header */}
@@ -23,9 +28,19 @@ export default function Index() {
         </p>
       </div>
 
+      {/* CTA */}
+      <Link to="/create">Create Task</Link>
+
       {/* tasks list */}
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4">
-        Lorem Ipsum
+        {tasks.length ? (
+          <Task />
+        ) : (
+          <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">
+            Wow, such empty! <br />
+            Try creating a task...
+          </p>
+        )}
       </div>
     </div>
   );
