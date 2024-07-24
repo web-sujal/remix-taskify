@@ -8,10 +8,22 @@ const formatDate = (date: string) => {
 const Task = ({ task }: { task: TaskType }) => {
   const [isCompleted, setIsCompleted] = useState(task.status === "completed");
 
+  const handleCheckChange = () => {
+    // TODO: update task status
+    // setIsCompleted(!isCompleted);
+    // task.status = "completed";
+  };
+
   return (
     <div className="flex w-full max-w-md bg-white gap-x-6 justify-between rounded-md items-center px-7 py-2">
       {/* checkbox */}
-      <input type="checkbox" name="status" id="status" checked={isCompleted} />
+      <input
+        type="checkbox"
+        name="status"
+        id="status"
+        onChange={handleCheckChange}
+        checked={isCompleted}
+      />
 
       {/* title, desc, due date, status */}
       <div className="flex max-w-md w-full flex-col items-start justify between gap-y-1">

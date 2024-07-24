@@ -1,8 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import Header from "~/components/Header";
 import Task from "~/components/Task";
-import { mockTasks } from "~/mockData";
+import { TaskType } from "~/types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,19 +17,22 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+
+  useEffect(() => {
+    const storedTasks = window.localStorage.getItem("tasks");
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+  }, []);
 
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
       {/* header */}
-      <div className="flex w-full flex-col gap-y-3 pt-5 items-center justify-center">
-        <h1 className="text-6xl font-extrabold text-emerald-700">
-          Welcome to Taskify...
-        </h1>
-        <p className="text-gray-500 text-xl tracking-widest">
-          Where actions meet expectations!
-        </p>
-      </div>
+      <Header
+        title="Welcome to Taskify..."
+        description="Where actions meet expectations!"
+      />
 
       {/* CTA */}
       <Link
