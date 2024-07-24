@@ -19,6 +19,13 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
 
+  const handleDelete = (id: number) => {
+    const updatedTasks = tasks.filter((task) => task.id !== id);
+    setTasks(updatedTasks);
+
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
+
   useEffect(() => {
     const storedTasks = window.localStorage.getItem("tasks");
     if (storedTasks) {
@@ -45,7 +52,9 @@ export default function Index() {
       {/* tasks list */}
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto gap-y-6">
         {tasks.length ? (
-          tasks.map((task) => <Task task={task} key={task.id} />)
+          tasks.map((task) => (
+            <Task key={task.id} task={task} handleDelete={handleDelete} />
+          ))
         ) : (
           <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">
             Wow, such empty! <br />
