@@ -12,3 +12,5 @@ export interface ErrorsType {
   description?: string;
   dueDate?: string;
 }
+
+export type Filter = "all" | "completed" | "pending" | "dueDate";

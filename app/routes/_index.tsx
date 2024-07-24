@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
-import { TaskType } from "~/types";
+import { TaskType, Filter } from "~/types";
+import { filterTasks } from "~/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,8 +16,6 @@ export const meta: MetaFunction = () => {
     },
   ];
 };
-
-type Filter = "all" | "completed" | "pending" | "dueDate";
 
 export default function Index() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -38,24 +37,6 @@ export default function Index() {
       setTasks(JSON.parse(storedTasks));
     }
   }, []);
-
-  const filterTasks = (data: TaskType[], filterType: Filter) => {
-    switch (filterType) {
-      case "all":
-        return data;
-      case "completed":
-        return data.filter((item) => item.status === "completed");
-      case "pending":
-        return data.filter((item) => item.status === "pending");
-      case "dueDate":
-        return data.sort(
-          (a, b) =>
-            new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
-        );
-      default:
-        return [];
-    }
-  };
 
   const filteredTasks = filterTasks(tasks, filter);
 

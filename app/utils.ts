@@ -1,4 +1,4 @@
-import { ErrorsType } from "./types";
+import { ErrorsType, TaskType, Filter } from "./types";
 
 export const isInvalidDueDate = (dueDate: string): boolean => {
   let currentDate = new Date().toISOString();
@@ -42,4 +42,21 @@ export const validateInputs = (
   }
 
   return {};
+};
+
+export const filterTasks = (data: TaskType[], filterType: Filter) => {
+  switch (filterType) {
+    case "all":
+      return data;
+    case "completed":
+      return data.filter((item) => item.status === "completed");
+    case "pending":
+      return data.filter((item) => item.status === "pending");
+    case "dueDate":
+      return data.sort(
+        (a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
+      );
+    default:
+      return [];
+  }
 };
