@@ -6,3 +6,9 @@ export interface TaskType {
   dueDate: string;
   status: "pending" | "completed";
 }
+
+export interface ErrorsType {
+  title?: string;
+  description?: string;
+  dueDate?: string;
+}
