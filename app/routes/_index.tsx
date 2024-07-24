@@ -50,7 +50,7 @@ export default function Index() {
       </Link>
 
       {/* tasks list */}
-      <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto gap-y-6">
+      <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto scrollbar gap-y-6">
         {tasks.length ? (
           tasks.map((task) => (
             <Task key={task.id} task={task} handleDelete={handleDelete} />
