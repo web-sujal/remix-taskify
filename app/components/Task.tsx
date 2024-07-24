@@ -41,6 +41,7 @@ const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
         type="checkbox"
         name="status"
         id="status"
+        className="size-5 cursor-pointer accent-rose-600"
         onChange={handleCheckChange}
         checked={isCompleted}
       />
