@@ -9,7 +9,11 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import Header from "~/components/Header";
-import { getCurrentDate, validateInputs } from "~/utils";
+import {
+  getCurrentDate,
+  saveTasksToLocalStorage,
+  validateInputs,
+} from "~/utils";
 import { ErrorsType, TaskType } from "~/types";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -49,7 +53,7 @@ const Create = () => {
       const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
       tasks.push(actionData.newTask);
 
-      window.localStorage.setItem("tasks", JSON.stringify(tasks));
+      saveTasksToLocalStorage("tasks", tasks);
       navigate("/");
     }
   }, [actionData, navigate]);

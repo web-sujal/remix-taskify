@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Header from "~/components/Header";
 import Task from "~/components/Task";
 import { TaskType, Filter } from "~/types";
-import { filterTasks } from "~/utils";
+import { fetchTasksFromLocalStorage, filterTasks } from "~/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -32,9 +32,9 @@ export default function Index() {
   };
 
   useEffect(() => {
-    const storedTasks = window.localStorage.getItem("tasks");
+    const storedTasks = fetchTasksFromLocalStorage();
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      setTasks(storedTasks);
     }
   }, []);
 

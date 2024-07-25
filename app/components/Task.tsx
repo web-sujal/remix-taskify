@@ -4,7 +4,11 @@ import { CiEdit } from "react-icons/ci";
 import { MdOutlineDelete } from "react-icons/md";
 
 import { TaskType } from "~/types";
-import { formatDate } from "~/utils";
+import {
+  fetchTasksFromLocalStorage,
+  formatDate,
+  saveTasksToLocalStorage,
+} from "~/utils";
 
 interface TaskProps {
   task: TaskType;
@@ -16,13 +20,12 @@ const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
   const [isCompleted, setIsCompleted] = useState(task.status === "completed");
 
   const handleCheckChange = () => {
-    const newStatus = task.status === "completed" ? "pending" : "completed";
+    const newStatus: TaskType["status"] =
+      task.status === "completed" ? "pending" : "completed";
     setIsCompleted(newStatus === "completed");
 
     // fetching tasks form localStorage
-    const storedTasks = JSON.parse(
-      window.localStorage.getItem("tasks") || "[]"
-    );
+    const storedTasks = fetchTasksFromLocalStorage();
 
     const updatedTasks = storedTasks.map((item: TaskType) =>
       item.id === task.id ? { ...item, status: newStatus } : item
@@ -31,7 +34,7 @@ const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
     setTasks(updatedTasks);
 
     // updating localStorage
-    window.localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    saveTasksToLocalStorage("tasks", updatedTasks);
   };
 
   return (

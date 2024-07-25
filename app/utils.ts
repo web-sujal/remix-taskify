@@ -60,3 +60,14 @@ export const filterTasks = (data: TaskType[], filterType: Filter) => {
       return [];
   }
 };
+
+export const fetchTasksFromLocalStorage = (): TaskType[] => {
+  return JSON.parse(window.localStorage.getItem("tasks") || "[]");
+};
+
+export const saveTasksToLocalStorage = (
+  key: string,
+  value: TaskType[]
+): void => {
+  window.localStorage.setItem(key, JSON.stringify(value));
+};

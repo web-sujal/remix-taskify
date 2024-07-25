@@ -11,7 +11,11 @@ import invariant from "tiny-invariant";
 
 import Header from "~/components/Header";
 import { ErrorsType, TaskType } from "~/types";
-import { validateInputs } from "~/utils";
+import {
+  fetchTasksFromLocalStorage,
+  saveTasksToLocalStorage,
+  validateInputs,
+} from "~/utils";
 
 export const loader = ({ params }: LoaderFunctionArgs) => {
   const taskId = params.taskId;
@@ -58,9 +62,7 @@ const Edit = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const storedTasks = JSON.parse(
-      window.localStorage.getItem("tasks") || "[]"
-    );
+    const storedTasks = fetchTasksFromLocalStorage();
 
     if (storedTasks && taskId) {
       const currTask = storedTasks.filter(
@@ -72,18 +74,16 @@ const Edit = () => {
 
   useEffect(() => {
     if (actionData?.newTask && Object.keys(actionData.newTask).length) {
-      const storedTasks = JSON.parse(
-        window.localStorage.getItem("tasks") || "[]"
-      );
+      const storedTasks = fetchTasksFromLocalStorage();
 
       const updatedTasks = storedTasks.map((item: TaskType) =>
         item.id === (actionData.newTask as TaskType).id
-          ? actionData.newTask
+          ? (actionData.newTask as TaskType)
           : item
       );
 
       // updating tasks on localStorage
-      window.localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+      saveTasksToLocalStorage("tasks", updatedTasks);
 
       navigate("/");
     }
