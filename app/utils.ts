@@ -25,11 +25,11 @@ export const validateInputs = (
 ) => {
   const errors: ErrorsType = {};
 
-  if (title.length < 4) {
+  if (title && title.trim() && title.length < 4) {
     errors.title = "Title should be at least 4 characters";
   }
 
-  if (description.length < 12) {
+  if (description && description.trim() && description.length < 12) {
     errors.description = "Description should be at least 12 characters";
   }
 

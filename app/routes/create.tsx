@@ -1,62 +1,56 @@
-import {
-  Form,
-  useActionData,
-  useNavigate,
-  useNavigation,
-} from "@remix-run/react";
-import { useEffect } from "react";
+import { Form, redirect, useActionData, useNavigation } from "@remix-run/react";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
 import Header from "~/components/Header";
-import {
-  getCurrentDate,
-  saveTasksToLocalStorage,
-  validateInputs,
-} from "~/utils";
+import { getCurrentDate, validateInputs } from "~/utils";
 import { ErrorsType, TaskType } from "~/types";
+import directus from "~/lib/directus";
+import { createItem } from "@directus/sdk";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
+  try {
+    const formData = await request.formData();
 
-  const title = String(formData.get("title"));
-  const description = String(formData.get("description"));
-  const dueDate = String(formData.get("dueDate"));
+    const title = String(formData.get("title"));
+    const description = String(formData.get("description"));
+    const dueDate = String(formData.get("dueDate"));
 
-  const errors: ErrorsType = validateInputs(title, description, dueDate);
-  let newTask: TaskType | object = {};
+    // initializing newTask and errors
+    const errors: ErrorsType = validateInputs(title, description, dueDate);
+    let newTask: TaskType | object = {};
 
-  if (Object.keys(errors).length > 0) {
-    return json({ errors, newTask });
+    if (Object.keys(errors).length > 0) {
+      return json(errors);
+    }
+
+    // creating task
+    newTask = {
+      title,
+      description,
+      dueDate,
+      status: "pending",
+    };
+
+    // saving task at directus
+    const createdTask = await directus.request(createItem("Tasks", newTask));
+
+    if (!createdTask) {
+      throw new Error("Failed to create task");
+    }
+
+    return redirect("/");
+  } catch (error) {
+    console.log((error as Error).message);
+
+    return redirect("/");
   }
-
-  newTask = {
-    id: Date.now(),
-    title,
-    description,
-    dueDate,
-    createdAt: new Date().toISOString(),
-    status: "pending",
-  };
-
-  return json({ errors, newTask });
 };
 
 const Create = () => {
   const navigation = useNavigation();
-  const navigate = useNavigate();
 
-  const actionData = useActionData<typeof action>();
-
-  useEffect(() => {
-    if (actionData && Object.keys(actionData.newTask).length) {
-      const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-      tasks.push(actionData.newTask);
-
-      saveTasksToLocalStorage("tasks", tasks);
-      navigate("/");
-    }
-  }, [actionData, navigate]);
+  const errors = useActionData<typeof action>();
 
   return (
     <main className="h-screen w-screen flex flex-col items-center justify-start bg-emerald-50 p-10 gap-y-10">
@@ -82,10 +76,8 @@ const Create = () => {
           />
 
           {/* error */}
-          {actionData?.errors.title && (
-            <em className="italic text-sm text-red-600">
-              {actionData.errors.title}
-            </em>
+          {errors?.title && (
+            <em className="italic text-sm text-red-600">{errors.title}</em>
           )}
         </div>
 
@@ -107,9 +99,9 @@ const Create = () => {
           />
 
           {/* error */}
-          {actionData?.errors?.description && (
+          {errors?.description && (
             <em className="italic text-sm text-red-600">
-              {actionData.errors.description}
+              {errors.description}
             </em>
           )}
         </div>
@@ -132,10 +124,8 @@ const Create = () => {
           />
 
           {/* error */}
-          {actionData?.errors?.dueDate && (
-            <em className="italic text-sm text-red-600">
-              {actionData.errors.dueDate}
-            </em>
+          {errors?.dueDate && (
+            <em className="italic text-sm text-red-600">{errors.dueDate}</em>
           )}
         </div>
 
@@ -153,39 +143,3 @@ const Create = () => {
 };
 
 export default Create;
-
-// const handleSubmit = (event: React.FormEvent) => {
-//   event.preventDefault();
-
-//   const newErrors: ErrorsType = {};
-
-//   if (task.title.length < 4) {
-//     newErrors.title = "Title should be at least 4 characters";
-//   }
-
-//   if (task.description.length < 12) {
-//     newErrors.description = "Description should be at least 12 characters";
-//   }
-
-//   if (isInvalidDueDate(task.dueDate)) {
-//     newErrors.dueDate = "Due date cannot be a past date";
-//   }
-
-//   if (Object.keys(newErrors).length > 0) {
-//     setErrors(newErrors);
-//     return;
-//   }
-
-//   setTask({ ...task, id: Date.now() });
-
-//   // Save to local storage
-//   const storedTasks = window.localStorage.getItem("tasks");
-//   const tasks = storedTasks ? JSON.parse(storedTasks) : [];
-//   tasks.push(task);
-//   window.localStorage.setItem("tasks", JSON.stringify(tasks));
-
-//   // Redirect to home page
-//   setTask({ ...task, title: "", description: "" });
-
-//   navigate("/");
-// };

@@ -1,32 +1,42 @@
+import { readItem, updateItem } from "@directus/sdk";
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import {
   Form,
+  redirect,
   useActionData,
   useLoaderData,
-  useNavigate,
   useNavigation,
 } from "@remix-run/react";
-import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 
 import Header from "~/components/Header";
+import directus from "~/lib/directus";
 import { ErrorsType, TaskType } from "~/types";
-import {
-  fetchTasksFromLocalStorage,
-  saveTasksToLocalStorage,
-  validateInputs,
-} from "~/utils";
+import { validateInputs, formatDate } from "~/utils";
 
-export const loader = ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const taskId = params.taskId;
   invariant(taskId, "Missing taskId param");
 
-  return json(taskId);
+  try {
+    const fetchedTask = await directus.request(readItem("Tasks", taskId));
+
+    if (!fetchedTask) {
+      throw new Error("Failed to fetch task");
+    }
+
+    return json(fetchedTask);
+  } catch (error) {
+    console.log((error as Error).message);
+
+    return redirect("/");
+  }
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const taskId = params.taskId;
+
   invariant(taskId, "Missing taskId param");
 
   const title = String(formData.get("title"));
@@ -34,60 +44,40 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const dueDate = String(formData.get("dueDate"));
 
   const errors: ErrorsType = validateInputs(title, description, dueDate);
-  let newTask: TaskType | object = {};
+  let updatedTask: TaskType | object = {};
 
   if (Object.keys(errors).length) {
-    return json({ errors, newTask });
+    return json(errors);
   }
 
-  newTask = {
-    id: Number(taskId),
+  updatedTask = {
     title,
     description,
     dueDate,
-    createdAt: new Date().toISOString(),
-    status: "pending",
   };
 
-  return json({ errors, newTask });
+  try {
+    const res = await directus.request(
+      updateItem("Tasks", taskId, updatedTask)
+    );
+
+    if (!res) {
+      throw new Error("Failed to update task");
+    }
+
+    return redirect("/");
+  } catch (error) {
+    console.log((error as Error).message);
+
+    return redirect("/");
+  }
 };
 
 const Edit = () => {
-  const taskId = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const task = useLoaderData<typeof loader>();
+  const errors = useActionData<typeof action>();
 
-  const [task, setTask] = useState<TaskType | null>(null);
-
-  const navigate = useNavigate();
   const navigation = useNavigation();
-
-  useEffect(() => {
-    const storedTasks = fetchTasksFromLocalStorage();
-
-    if (storedTasks && taskId) {
-      const currTask = storedTasks.filter(
-        (item: TaskType) => item.id === Number(taskId)
-      );
-      setTask(currTask[0]);
-    }
-  }, [taskId]);
-
-  useEffect(() => {
-    if (actionData?.newTask && Object.keys(actionData.newTask).length) {
-      const storedTasks = fetchTasksFromLocalStorage();
-
-      const updatedTasks = storedTasks.map((item: TaskType) =>
-        item.id === (actionData.newTask as TaskType).id
-          ? (actionData.newTask as TaskType)
-          : item
-      );
-
-      // updating tasks on localStorage
-      saveTasksToLocalStorage("tasks", updatedTasks);
-
-      navigate("/");
-    }
-  }, [actionData, navigate]);
 
   return (
     <main className="h-screen w-screen flex flex-col items-center justify-start bg-emerald-50 p-10 gap-y-10">
@@ -113,10 +103,8 @@ const Edit = () => {
           />
 
           {/* error */}
-          {actionData?.errors?.title && (
-            <em className="italic text-sm text-red-600">
-              {actionData.errors.title}
-            </em>
+          {errors?.title && (
+            <em className="italic text-sm text-red-600">{errors.title}</em>
           )}
         </div>
 
@@ -139,9 +127,9 @@ const Edit = () => {
           />
 
           {/* error */}
-          {actionData?.errors?.description && (
+          {errors?.description && (
             <em className="italic text-sm text-red-600">
-              {actionData.errors.description}
+              {errors.description}
             </em>
           )}
         </div>
@@ -158,16 +146,14 @@ const Edit = () => {
             id="dueDate"
             name="dueDate"
             type="date"
-            defaultValue={task?.dueDate}
+            defaultValue={formatDate(task?.dueDate)}
             className="input"
             required
           />
 
           {/* error */}
-          {actionData?.errors?.dueDate && (
-            <em className="italic text-sm text-red-600">
-              {actionData.errors.dueDate}
-            </em>
+          {errors?.dueDate && (
+            <em className="italic text-sm text-red-600">{errors.dueDate}</em>
           )}
         </div>
 
