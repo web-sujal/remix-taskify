@@ -16,3 +16,8 @@ export interface ErrorsType {
 }
 
 export type Filter = "all" | "completed" | "pending" | "dueDate";
+
+export interface AuthErrors {
+  email?: string;
+  password?: string;
+}

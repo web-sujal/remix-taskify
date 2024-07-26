@@ -1,4 +1,4 @@
-import { ErrorsType, TaskType, Filter } from "./types";
+import { ErrorsType, TaskType, Filter, AuthErrors } from "./types";
 
 export const isInvalidDueDate = (dueDate: string): boolean => {
   let currentDate = new Date().toISOString();
@@ -61,13 +61,25 @@ export const filterTasks = (data: TaskType[], filterType: Filter) => {
   }
 };
 
-export const fetchTasksFromLocalStorage = (): TaskType[] => {
-  return JSON.parse(window.localStorage.getItem("tasks") || "[]");
+export const isValidEmail = (email: string) => {
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return regex.test(email);
 };
 
-export const saveTasksToLocalStorage = (
-  key: string,
-  value: TaskType[]
-): void => {
-  window.localStorage.setItem(key, JSON.stringify(value));
+export const validateEmailAndPass = (email: string, password: string) => {
+  const errors: AuthErrors = {};
+
+  if (!isValidEmail(email)) {
+    errors.email = "Please enter a valid email";
+  }
+
+  if (password && password.trim() && password.length < 6) {
+    errors.password = "Password must be at least 6 characters";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return errors;
+  }
+
+  return {};
 };
