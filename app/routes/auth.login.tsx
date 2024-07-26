@@ -1,7 +1,7 @@
-import { authentication, createDirectus, rest } from "@directus/sdk";
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 
 import AuthForm from "~/components/AuthForm";
+import { directusAuthClient } from "~/lib/directus";
 import { AuthErrors } from "~/types";
 import { validateEmailAndPass } from "~/utils";
 
@@ -18,11 +18,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json(errors);
     }
 
-    const client = createDirectus(process.env.DIRECTUS_URL || "")
-      .with(authentication("json"))
-      .with(rest());
-
-    const user = await client.login(email, password);
+    const user = await directusAuthClient.login(email, password);
     console.log("user: ", user);
 
     return redirect("/");
