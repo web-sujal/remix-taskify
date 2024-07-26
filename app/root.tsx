@@ -6,7 +6,6 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import "./tailwind.css";
-import { TaskContextProvider } from "./context/TaskContext";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +17,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <TaskContextProvider>{children}</TaskContextProvider>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
