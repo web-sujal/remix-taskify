@@ -1,6 +1,6 @@
 import { registerUser } from "@directus/sdk";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/react";
+import { json, redirect, useActionData } from "@remix-run/react";
 
 import AuthForm from "~/components/AuthForm";
 import directus from "~/lib/directus";
@@ -8,7 +8,10 @@ import { AuthErrors } from "~/types";
 import { validateEmailAndPass } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("inside action signup");
   try {
+    console.log("inside signup try block: ");
+
     const formData = await request.formData();
 
     const email = String(formData.get("email"));
@@ -20,21 +23,33 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json(errors);
     }
 
+    console.log("signing up woohooo");
     const user = await directus.request(registerUser(email, password));
-    console.log("user: ", user);
+    console.log("signup user: ", user);
 
     return redirect("/");
   } catch (error) {
     console.log((error as Error).message);
-    return redirect("/signup");
+    return redirect("/auth/signup");
   }
 };
 
 const Signup = () => {
+  const errors = useActionData<typeof action>();
+
   return (
-    <>
+    <div className="flex flex-col items-center justify-center gap-y-6 w-full">
       <AuthForm type="signup" />
-    </>
+
+      <div className="flex flex-col items-center justify-between gap-y-3">
+        {errors?.email && (
+          <em className="italic text-sm text-red-600">{errors.email}</em>
+        )}
+        {errors?.password && (
+          <em className="italic text-sm text-red-600">{errors.password}</em>
+        )}
+      </div>
+    </div>
   );
 };
 

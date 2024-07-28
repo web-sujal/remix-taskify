@@ -1,12 +1,13 @@
-import { readItems } from "@directus/sdk";
+import { deleteField } from "@directus/sdk";
 import type { MetaFunction } from "@remix-run/node";
-import { json, Link, useLoaderData } from "@remix-run/react";
+import { json, Link, useSubmit } from "@remix-run/react";
 import { useState } from "react";
+import { BiLogOut } from "react-icons/bi";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
 import directus from "~/lib/directus";
-import { TaskType, Filter } from "~/types";
+import { Filter, TaskType } from "~/types";
 import { filterTasks } from "~/utils";
 
 export const meta: MetaFunction = () => {
@@ -20,10 +21,35 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
+  console.log("inside loader---------: ");
   try {
-    const tasks = await directus.request(readItems("Tasks"));
+    console.log("inside loader try block: ");
+    // const tasks = await directus.request(readItems("Tasks"));
+    console.log("reading users: ");
+    const result = await directus.request(
+      deleteField("directus_users", "tasksId")
+    );
+    console.log("result: ");
+    console.log(result);
+    const result2 = await directus.request(
+      deleteField("directus_user", "taskId")
+    );
+    // const result = await directus.request(
+    //   readUsers({
+    //     fields: ['*'],
+    //   })
+    // );
+    // const result = await directus.request(
+    //   readMe({
+    //     fields: ["*"],
+    //   })
+    // );
 
-    return json(tasks);
+    console.log("result:2 ");
+    console.log(result2);
+    // console.log("curr user: ", result);
+
+    return json([]);
   } catch (error) {
     console.log((error as Error).message);
     return json([]);
@@ -31,7 +57,8 @@ export const loader = async () => {
 };
 
 export default function Index() {
-  const tasksFromDB = useLoaderData<typeof loader>();
+  // const tasksFromDB = useLoaderData<typeof loader>();
+  const submit = useSubmit();
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -47,7 +74,11 @@ export default function Index() {
     );
   };
 
-  const filteredTasks = search(filterTasks(tasksFromDB, filter));
+  const filteredTasks = search(filterTasks([], filter));
+
+  const handleLogout = async () => {
+    submit({ just: "logout" }, { method: "post", action: "/auth/logout" });
+  };
 
   return (
     <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
@@ -101,6 +132,15 @@ export default function Index() {
             onClick={() => setFilter("dueDate")}
           >
             Due Date
+          </button>
+          <Link className="filterBtn text-nowrap" to="/auth/signup">
+            Sign up
+          </Link>
+          <button
+            className="flex gap-x-1 rounded-md bg-red-700 text-white px-4 py-3 hover:bg-red-800 disabled:cursor-not-allowed transition drop-shadow-xl w-full text-nowrap"
+            onClick={handleLogout}
+          >
+            Logout <BiLogOut size={20} className="text-white" />
           </button>
         </div>
       </div>

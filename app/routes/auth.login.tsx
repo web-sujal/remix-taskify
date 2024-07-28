@@ -1,4 +1,5 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import { useActionData } from "@remix-run/react";
 
 import AuthForm from "~/components/AuthForm";
 import { directusAuthClient } from "~/lib/directus";
@@ -6,6 +7,7 @@ import { AuthErrors } from "~/types";
 import { validateEmailAndPass } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("inside loggin in");
   try {
     const formData = await request.formData();
 
@@ -18,21 +20,44 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json(errors);
     }
 
+    console.log("initiating login: ");
     const user = await directusAuthClient.login(email, password);
-    console.log("user: ", user);
 
+    if (!user) {
+      errors.invalidCredentials = "Invalid user credentials";
+      return json(errors);
+    }
+
+    console.log(errors);
     return redirect("/");
   } catch (error) {
     console.log((error as Error).message);
-    return redirect("/login");
+    return redirect("/auth/login");
   }
 };
 
 const Login = () => {
+  const errors = useActionData<typeof action>();
+
   return (
-    <>
+    <div className="flex flex-col items-center justify-center gap-y-6 w-full">
       <AuthForm type="login" />
-    </>
+
+      <div className="flex flex-col items-center justify-between gap-y-3">
+        {errors?.email && (
+          <em className="italic text-sm text-red-600">{errors.email}</em>
+        )}
+        {errors?.password && (
+          <em className="italic text-sm text-red-600">{errors.password}</em>
+        )}
+
+        {errors?.invalidCredentials && (
+          <em className="italic text-sm text-red-600">
+            {errors.invalidCredentials}
+          </em>
+        )}
+      </div>
+    </div>
   );
 };
 
