@@ -1,5 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData, useSubmit } from "@remix-run/react";
+import { json, Link, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 
@@ -19,8 +19,9 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = () => {
-  return getTasks();
+export const loader = async () => {
+  const tasks = await getTasks();
+  return json(tasks);
 };
 
 export default function Index() {
