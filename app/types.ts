@@ -4,7 +4,7 @@ export interface TaskType {
   description: string;
   createdAt: string;
   updatedAt?: string;
-  dueDate: Date;
+  dueDate: string;
   status: "pending" | "completed";
   userId?: string;
 }

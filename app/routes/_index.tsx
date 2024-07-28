@@ -1,12 +1,11 @@
-import { deleteField } from "@directus/sdk";
 import type { MetaFunction } from "@remix-run/node";
-import { json, Link, useSubmit } from "@remix-run/react";
+import { Link, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
-import directus from "~/lib/directus";
+import { getTasks } from "~/lib/tasks.server";
 import { Filter, TaskType } from "~/types";
 import { filterTasks } from "~/utils";
 
@@ -20,44 +19,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  console.log("inside loader---------: ");
-  try {
-    console.log("inside loader try block: ");
-    // const tasks = await directus.request(readItems("Tasks"));
-    console.log("reading users: ");
-    const result = await directus.request(
-      deleteField("directus_users", "tasksId")
-    );
-    console.log("result: ");
-    console.log(result);
-    const result2 = await directus.request(
-      deleteField("directus_user", "taskId")
-    );
-    // const result = await directus.request(
-    //   readUsers({
-    //     fields: ['*'],
-    //   })
-    // );
-    // const result = await directus.request(
-    //   readMe({
-    //     fields: ["*"],
-    //   })
-    // );
-
-    console.log("result:2 ");
-    console.log(result2);
-    // console.log("curr user: ", result);
-
-    return json([]);
-  } catch (error) {
-    console.log((error as Error).message);
-    return json([]);
-  }
+export const loader = () => {
+  return getTasks();
 };
 
 export default function Index() {
-  // const tasksFromDB = useLoaderData<typeof loader>();
+  const tasks = useLoaderData<typeof loader>();
   const submit = useSubmit();
 
   const [query, setQuery] = useState("");
@@ -74,7 +41,7 @@ export default function Index() {
     );
   };
 
-  const filteredTasks = search(filterTasks([], filter));
+  const filteredTasks = search(filterTasks(tasks, filter));
 
   const handleLogout = async () => {
     submit({ just: "logout" }, { method: "post", action: "/auth/logout" });
