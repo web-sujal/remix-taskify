@@ -11,7 +11,7 @@ import invariant from "tiny-invariant";
 
 import Header from "~/components/Header";
 import directus from "~/lib/directus";
-import { ErrorsType, TaskType } from "~/types";
+import { ErrorsType } from "~/types";
 import { validateInputs, formatDate } from "~/utils";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -44,13 +44,12 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const dueDate = String(formData.get("dueDate"));
 
   const errors: ErrorsType = validateInputs(title, description, dueDate);
-  let updatedTask: TaskType | object = {};
 
   if (Object.keys(errors).length) {
     return json(errors);
   }
 
-  updatedTask = {
+  const updatedTask = {
     title,
     description,
     dueDate,

@@ -1,10 +1,10 @@
 export interface TaskType {
-  id: number;
+  id: string;
   title: string;
   description: string;
   createdAt: string;
   updatedAt?: string;
-  dueDate: string;
+  dueDate: Date;
   status: "pending" | "completed";
   userId?: string;
 }
