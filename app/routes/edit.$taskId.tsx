@@ -1,4 +1,4 @@
-import { readItem, updateItem } from "@directus/sdk";
+import { updateItem } from "@directus/sdk";
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import {
   Form,
@@ -11,26 +11,16 @@ import invariant from "tiny-invariant";
 
 import Header from "~/components/Header";
 import directus from "~/lib/directus";
+import { getTask } from "~/lib/tasks.server";
 import { ErrorsType } from "~/types";
-import { validateInputs, formatDate } from "~/utils";
+import { formatDate, validateInputs } from "~/utils";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const taskId = params.taskId;
   invariant(taskId, "Missing taskId param");
 
-  try {
-    const fetchedTask = await directus.request(readItem("Tasks", taskId));
-
-    if (!fetchedTask) {
-      throw new Error("Failed to fetch task");
-    }
-
-    return json(fetchedTask);
-  } catch (error) {
-    console.log((error as Error).message);
-
-    return redirect("/");
-  }
+  const task = await getTask(taskId);
+  return json(task);
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -77,6 +67,7 @@ const Edit = () => {
   const errors = useActionData<typeof action>();
 
   const navigation = useNavigation();
+  const isSubmitting = navigation.state !== "idle";
 
   return (
     <main className="h-screen w-screen flex flex-col items-center justify-start bg-emerald-50 p-10 gap-y-10">
@@ -96,6 +87,7 @@ const Edit = () => {
             name="title"
             type="text"
             defaultValue={task?.title}
+            min={4}
             className="input"
             placeholder="eg. buy groceries"
             required
@@ -119,6 +111,7 @@ const Edit = () => {
             id="description"
             name="description"
             rows={4}
+            minLength={12}
             defaultValue={task?.description}
             className="input resize-none"
             placeholder="eg. buy fruits..."
@@ -159,10 +152,10 @@ const Edit = () => {
         {/* submit button */}
         <button
           type="submit"
-          disabled={navigation.state === "submitting"}
-          className="rounded-md bg-rose-700 text-white px-4 py-3 hover:bg-rose-800 disabled:cursor-not-allowed transition drop-shadow-xl text-extrabold w-full"
+          disabled={isSubmitting}
+          className="createAndUpdateTaskBtn"
         >
-          Edit
+          {isSubmitting ? "Editing..." : "Edit Task"}
         </button>
       </Form>
     </main>

@@ -112,7 +112,7 @@ const Create = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-rose-700 text-white px-4 py-3 hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-90 transition drop-shadow-xl text-extrabold w-full"
+          className="createAndUpdateTaskBtn"
         >
           {isSubmitting ? "Creating..." : "Create Task"}
         </button>
