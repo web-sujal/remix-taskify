@@ -1,32 +1,17 @@
-import { updateItem } from "@directus/sdk";
 import { ActionFunctionArgs, redirect } from "@remix-run/node";
 import invariant from "tiny-invariant";
-import directus from "~/lib/directus";
+
+import { editTask } from "~/lib/tasks.server";
+import { TaskType } from "~/types";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
 
-  const id = formData.get("taskId");
-  const status = formData.get("status");
+  const id = String(formData.get("taskId"));
+  const status = String(formData.get("status")) as TaskType["status"];
 
   invariant(id, "Missing taskId params");
 
-  const updatedTask = {
-    status,
-  };
-
-  try {
-    const res = await directus.request(
-      updateItem("Tasks", id as string, updatedTask)
-    );
-
-    if (!res) {
-      throw new Error("Failed to update task status");
-    }
-
-    return redirect("/");
-  } catch (error) {
-    console.log((error as Error).message);
-    return redirect("/");
-  }
+  await editTask(id, { status });
+  return redirect("/");
 };
