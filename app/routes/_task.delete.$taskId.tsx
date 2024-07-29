@@ -3,6 +3,10 @@ import invariant from "tiny-invariant";
 
 import { deleteTask } from "~/lib/tasks.server";
 
+export const loader = async () => {
+  return redirect("/");
+};
+
 export const action = async ({ params }: ActionFunctionArgs) => {
   const id = params.taskId;
   invariant(id, "Missing taskId in params");
