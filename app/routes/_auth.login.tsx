@@ -30,7 +30,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return redirect("/");
   } catch (error) {
     console.log((error as Error).message);
-    return redirect("/auth/login");
+    return redirect("/login");
   }
 };
 
