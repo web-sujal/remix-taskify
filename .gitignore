@@ -4,4 +4,4 @@ node_modules
 /build
 .env
 
-sessiontoken.txt
+staticToken.txt
