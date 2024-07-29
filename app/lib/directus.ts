@@ -5,11 +5,9 @@ type Schema = {
   Tasks: TaskType[];
 };
 
-console.log("process.env.DIRECTUS_URL: ", process.env.DIRECTUS_URL);
 const directus = createDirectus<Schema>(process.env.DIRECTUS_URL || "").with(
   rest()
 );
-console.log("process.env.DIRECTUS_URL: ", process.env.DIRECTUS_URL);
 export const directusAuthClient = createDirectus(process.env.DIRECTUS_URL || "")
   .with(authentication("json"))
   .with(rest());
