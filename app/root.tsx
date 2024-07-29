@@ -34,32 +34,50 @@ export function ErrorBoundary() {
 
   if (isRouteErrorResponse(error)) {
     return (
-      <div className="box">
-        <Header
-          title={error.status + " " + error.statusText}
-          description={error.data}
-        />
-        <p className="w-full text-2xl text-gray-700 text-center">
-          Back to{" "}
-          <Link className="createAndUpdateTaskBtn" to="/">
-            Safety
-          </Link>
-          .
-        </p>
-      </div>
+      <html lang="en">
+        <head>
+          <title>Oh no!</title>
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <div className="box">
+            <Header
+              title={error.status + " " + error.statusText}
+              description={error.data}
+            />
+            <p className="w-full text-2xl text-gray-700 text-center">
+              Back to{" "}
+              <Link className="createAndUpdateTaskBtn" to="/">
+                Safety
+              </Link>
+              .
+            </p>
+          </div>
+        </body>
+      </html>
     );
   } else if (error instanceof Error) {
     return (
-      <div className="box">
-        <Header title={error.name} description={error.message} />
-        <p className="w-full text-2xl text-gray-700 text-center">
-          Back to{" "}
-          <Link className="createAndUpdateTaskBtn" to="/">
-            Safety
-          </Link>
-          .
-        </p>
-      </div>
+      <html lang="en">
+        <head>
+          <title>Oh no!</title>
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <div className="box">
+            <Header title={error.name} description={error.message} />
+            <p className="w-full text-2xl text-gray-700 text-center">
+              Back to{" "}
+              <Link className="createAndUpdateTaskBtn" to="/">
+                Safety
+              </Link>
+              .
+            </p>
+          </div>
+        </body>
+      </html>
     );
   } else {
     return <h1>Unknown Error</h1>;
