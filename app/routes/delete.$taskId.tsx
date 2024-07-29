@@ -1,18 +1,13 @@
-import { deleteItem } from "@directus/sdk";
 import { ActionFunctionArgs, redirect } from "@remix-run/node";
 import invariant from "tiny-invariant";
 
-import directus from "~/lib/directus";
+import { deleteTask } from "~/lib/tasks.server";
 
 export const action = async ({ params }: ActionFunctionArgs) => {
   const id = params.taskId;
   invariant(id, "Missing taskId in params");
 
-  try {
-    await directus.request(deleteItem("Tasks", id));
-  } catch (error) {
-    console.log((error as Error).message);
-  }
+  await deleteTask(id);
 
   return redirect("/");
 };

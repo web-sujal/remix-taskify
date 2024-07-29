@@ -1,4 +1,10 @@
-import { createItem, readItem, readItems, updateItem } from "@directus/sdk";
+import {
+  createItem,
+  deleteItem,
+  readItem,
+  readItems,
+  updateItem,
+} from "@directus/sdk";
 
 import { TaskType } from "~/types";
 import directus from "./directus";
@@ -96,6 +102,15 @@ export const editTask = async (
 ) => {
   try {
     await directus.request(updateItem("Tasks", taskId, updatedTask));
+  } catch (error) {
+    console.log((error as Error).message);
+    throw error;
+  }
+};
+
+export const deleteTask = async (id: string) => {
+  try {
+    await directus.request(deleteItem("Tasks", id));
   } catch (error) {
     console.log((error as Error).message);
     throw error;
