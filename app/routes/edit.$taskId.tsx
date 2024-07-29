@@ -1,4 +1,3 @@
-import { updateItem } from "@directus/sdk";
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import {
   Form,
@@ -10,8 +9,7 @@ import {
 import invariant from "tiny-invariant";
 
 import Header from "~/components/Header";
-import directus from "~/lib/directus";
-import { getTask } from "~/lib/tasks.server";
+import { editTask, getTask } from "~/lib/tasks.server";
 import { ErrorsType } from "~/types";
 import { formatDate, validateInputs } from "~/utils";
 
@@ -45,21 +43,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     dueDate,
   };
 
-  try {
-    const res = await directus.request(
-      updateItem("Tasks", taskId, updatedTask)
-    );
-
-    if (!res) {
-      throw new Error("Failed to update task");
-    }
-
-    return redirect("/");
-  } catch (error) {
-    console.log((error as Error).message);
-
-    return redirect("/");
-  }
+  await editTask(taskId, updatedTask);
+  return redirect("/");
 };
 
 const Edit = () => {
@@ -74,7 +59,7 @@ const Edit = () => {
       <Header title="Edit Task" description="Let's define your actions..." />
 
       <Form
-        method="post"
+        method="patch"
         className="flex flex-col bg-emerald-100 rounded-lg p-10 items-start justify-start gap-y-6 max-w-lg w-full"
       >
         {/* title */}

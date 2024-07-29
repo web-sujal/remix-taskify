@@ -1,4 +1,4 @@
-import { createItem, readItem, readItems } from "@directus/sdk";
+import { createItem, readItem, readItems, updateItem } from "@directus/sdk";
 
 import { TaskType } from "~/types";
 import directus from "./directus";
@@ -72,7 +72,7 @@ export const getTasks = async (): Promise<TaskType[]> => {
     // );
 
     // return tasks as TaskType[];
-    return mockTasks;
+    return mockTasks; // to be removed later when directus is active
   } catch (error) {
     console.log((error as Error).message);
     throw error;
@@ -83,7 +83,19 @@ export const getTask = async (taskId: string): Promise<TaskType> => {
   try {
     // const task = await directus.request(readItem("Tasks", taskId));
     // return task;
-    return mockTasks[0];
+    return mockTasks[0]; // to be removed later when directus is active
+  } catch (error) {
+    console.log((error as Error).message);
+    throw error;
+  }
+};
+
+export const editTask = async (
+  taskId: string,
+  updatedTask: Partial<TaskType>
+) => {
+  try {
+    await directus.request(updateItem("Tasks", taskId, updatedTask));
   } catch (error) {
     console.log((error as Error).message);
     throw error;
