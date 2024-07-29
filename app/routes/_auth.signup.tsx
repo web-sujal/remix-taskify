@@ -1,13 +1,13 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import { registerUser } from "@directus/sdk";
+import { ActionFunctionArgs } from "@remix-run/node";
+import { json, redirect, useActionData } from "@remix-run/react";
 
 import AuthForm from "~/components/AuthForm";
-import { directusAuthClient } from "~/lib/directus";
+import directus from "~/lib/directus";
 import { AuthErrors } from "~/types";
 import { validateEmailAndPass } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  console.log("inside loggin in");
   try {
     const formData = await request.formData();
 
@@ -20,28 +20,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json(errors);
     }
 
-    console.log("initiating login: ");
-    const user = await directusAuthClient.login(email, password);
+    const user = await directus.request(registerUser(email, password));
+    console.log("signup user: ", user);
 
-    if (!user) {
-      errors.invalidCredentials = "Invalid user credentials";
-      return json(errors);
-    }
-
-    console.log(errors);
     return redirect("/");
   } catch (error) {
     console.log((error as Error).message);
-    return redirect("/auth/login");
+    return redirect("/auth/signup");
   }
 };
 
-const Login = () => {
+const Signup = () => {
   const errors = useActionData<typeof action>();
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-6 w-full">
-      <AuthForm type="login" />
+      <AuthForm type="signup" />
 
       <div className="flex flex-col items-center justify-between gap-y-3">
         {errors?.email && (
@@ -50,15 +44,9 @@ const Login = () => {
         {errors?.password && (
           <em className="italic text-sm text-red-600">{errors.password}</em>
         )}
-
-        {errors?.invalidCredentials && (
-          <em className="italic text-sm text-red-600">
-            {errors.invalidCredentials}
-          </em>
-        )}
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Signup;

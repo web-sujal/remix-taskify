@@ -73,7 +73,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
             {"Don't have an account? "}
             <Link
               className="cursor-pointer text-emerald-600 font-bold"
-              to="/auth/signup"
+              to="/signup"
             >
               Sign up
             </Link>
@@ -83,7 +83,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
             Already have an account?{" "}
             <Link
               className="cursor-pointer text-emerald-600 font-bold"
-              to="/auth/login"
+              to="/login"
             >
               Login
             </Link>
