@@ -45,11 +45,12 @@ export default function Index() {
   const filteredTasks = search(filterTasks(tasks, filter));
 
   const handleLogout = async () => {
-    submit({ just: "logout" }, { method: "post", action: "/auth/logout" });
+    // update logic later when directus is active
+    submit({ just: "logout" }, { method: "post", action: "/logout" });
   };
 
   return (
-    <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
+    <div className="box">
       {/* header */}
       <Header
         title="Welcome to Taskify..."
@@ -101,7 +102,7 @@ export default function Index() {
           >
             Due Date
           </button>
-          <Link className="filterBtn text-nowrap" to="/auth/signup">
+          <Link className="filterBtn text-nowrap" to="/signup">
             Sign up
           </Link>
           <button
