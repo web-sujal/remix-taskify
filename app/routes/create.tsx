@@ -1,11 +1,12 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, redirect, useActionData, useNavigation } from "@remix-run/react";
+import { redirect, useActionData } from "@remix-run/react";
 
 import Header from "~/components/Header";
+import TaskForm from "~/components/TaskForm";
 import { addTask } from "~/lib/tasks.server";
 import { ErrorsType } from "~/types";
-import { getCurrentDate, validateInputs } from "~/utils";
+import { validateInputs } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -25,98 +26,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 const Create = () => {
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state !== "idle";
-
   const errors = useActionData<typeof action>();
 
   return (
     <main className="h-screen w-screen flex flex-col items-center justify-start bg-emerald-50 p-10 gap-y-10">
       <Header title="Create Task" description="What's on your mind!!!" />
 
-      <Form
-        method="post"
-        className="flex flex-col bg-emerald-100 rounded-lg p-10 items-start justify-start gap-y-6 max-w-lg w-full"
-      >
-        {/* title */}
-        <div className="flex w-full flex-col items-start justify-between gap-y-1">
-          <label className="text-lg font-bold text-emerald-900" htmlFor="title">
-            Title:
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            min={4}
-            className="input"
-            placeholder="eg. buy groceries"
-            required
-          />
-
-          {/* error */}
-          {errors?.title && (
-            <em className="italic text-sm text-red-600">{errors.title}</em>
-          )}
-        </div>
-
-        {/* Description */}
-        <div className="flex w-full flex-col items-start justify-between gap-y-1">
-          <label
-            className="text-lg font-bold text-emerald-900"
-            htmlFor="description"
-          >
-            Description:
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={4}
-            minLength={12}
-            className="input resize-none"
-            placeholder="eg. buy fruits..."
-            required
-          />
-
-          {/* error */}
-          {errors?.description && (
-            <em className="italic text-sm text-red-600">
-              {errors.description}
-            </em>
-          )}
-        </div>
-
-        {/* Due Date */}
-        <div className="flex w-full flex-col items-start justify-between gap-y-1">
-          <label
-            className="text-lg font-bold text-emerald-900"
-            htmlFor="dueDate"
-          >
-            Due Date:
-          </label>
-          <input
-            id="dueDate"
-            name="dueDate"
-            type="date"
-            defaultValue={getCurrentDate()}
-            className="input"
-            required
-          />
-
-          {/* error */}
-          {errors?.dueDate && (
-            <em className="italic text-sm text-red-600">{errors.dueDate}</em>
-          )}
-        </div>
-
-        {/* submit button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="createAndUpdateTaskBtn"
-        >
-          {isSubmitting ? "Creating..." : "Create Task"}
-        </button>
-      </Form>
+      <TaskForm type="create" errors={errors} />
     </main>
   );
 };
