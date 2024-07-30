@@ -90,6 +90,6 @@ export const getUserIdFromRequest = async (request: Request) => {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader) return null;
 
-  const userCookie = await createCookie("userId").parse(cookieHeader);
+  const userCookie = await createCookie("user_id").parse(cookieHeader);
   return userCookie || null;
 };
