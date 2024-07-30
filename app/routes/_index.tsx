@@ -1,11 +1,14 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
-import { useState, useEffect } from "react";
+import { readItems } from "@directus/sdk";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { Link, useLoaderData, useSubmit } from "@remix-run/react";
+import { useState } from "react";
+import { BiLogOut } from "react-icons/bi";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
-import { TaskType, Filter } from "~/types";
-import { fetchTasksFromLocalStorage, filterTasks } from "~/utils";
+import directus from "~/lib/directus";
+import { Filter, TaskType } from "~/types";
+import { filterTasks, getUserIdFromRequest } from "~/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,26 +20,33 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await getUserIdFromRequest(request);
+
+  try {
+    const tasks = await directus.request(
+      readItems("Tasks", {
+        filter: {
+          userId: {
+            _eq: userId,
+          },
+        },
+      })
+    );
+
+    return tasks || [];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw error;
+  }
+};
+
 export default function Index() {
-  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const tasks = useLoaderData<typeof loader>();
+  const submit = useSubmit();
+
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-
-  const handleDelete = (id: number) => {
-    if (!confirm("Do you really want to delete this task?")) return;
-
-    const updatedTasks = tasks.filter((task) => task.id !== id);
-    setTasks(updatedTasks);
-
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-  };
-
-  useEffect(() => {
-    const storedTasks = fetchTasksFromLocalStorage();
-    if (storedTasks) {
-      setTasks(storedTasks);
-    }
-  }, []);
 
   const keys: (keyof Pick<TaskType, "title" | "description">)[] = [
     "title",
@@ -51,8 +61,14 @@ export default function Index() {
 
   const filteredTasks = search(filterTasks(tasks, filter));
 
+  const handleLogout = async () => {
+    console.log("clicked logout");
+    // update logic later when directus is active
+    submit(null, { method: "post", action: "/logout" });
+  };
+
   return (
-    <div className="font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10">
+    <div className="box">
       {/* header */}
       <Header
         title="Welcome to Taskify..."
@@ -104,20 +120,22 @@ export default function Index() {
           >
             Due Date
           </button>
+          <Link className="filterBtn text-nowrap" to="/signup">
+            Sign up
+          </Link>
+          <button
+            className="flex gap-x-1 rounded-md bg-red-700 z-30 text-white px-4 py-3 hover:bg-red-800 disabled:cursor-not-allowed transition drop-shadow-xl w-full text-nowrap"
+            onClick={handleLogout}
+          >
+            Logout <BiLogOut size={20} className="text-white" />
+          </button>
         </div>
       </div>
 
       {/* tasks list */}
       <div className="w-full bg-emerald-100 rounded-md flex flex-col h-full items-center justify-start p-4 overflow-y-auto scrollbar gap-y-6">
         {filteredTasks.length ? (
-          filteredTasks.map((task) => (
-            <Task
-              key={task.id}
-              task={task}
-              setTasks={setTasks}
-              handleDelete={handleDelete}
-            />
-          ))
+          filteredTasks.map((task) => <Task key={task.id} task={task} />)
         ) : (
           <p className="text-emerald-800 text-2xl text-bold my-auto text-center text-opacity-60">
             Wow, such empty! <br />

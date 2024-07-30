@@ -2,12 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+.box {
+  @apply font-sans flex flex-col items-start justify-center bg-emerald-50 p-10 h-screen gap-y-10;
+}
+
 .input {
   @apply px-3 py-2 rounded-md w-full placeholder:text-gray-400 placeholder:text-sm border-none focus:outline-none;
 }
 
 .filterBtn {
   @apply rounded-md bg-emerald-700 text-white px-4 py-3 hover:bg-emerald-800 disabled:cursor-not-allowed transition drop-shadow-xl w-full;
+}
+
+.createAndUpdateTaskBtn {
+  @apply rounded-md bg-rose-700 text-white px-4 py-3 hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-90 transition drop-shadow-xl font-extrabold w-full;
 }
 
 @layer utilities {

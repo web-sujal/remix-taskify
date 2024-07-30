@@ -1,10 +1,11 @@
 export interface TaskType {
-  id: number;
+  id: string;
   title: string;
   description: string;
   createdAt: string;
   dueDate: string;
   status: "pending" | "completed";
+  userId?: string;
 }
 
 export interface ErrorsType {
@@ -14,3 +15,9 @@ export interface ErrorsType {
 }
 
 export type Filter = "all" | "completed" | "pending" | "dueDate";
+
+export interface AuthErrors {
+  email?: string;
+  password?: string;
+  invalidCredentials?: string;
+}

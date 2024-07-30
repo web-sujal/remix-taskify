@@ -1,40 +1,38 @@
-import { Link } from "@remix-run/react";
+import { Link, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDelete } from "react-icons/md";
 
 import { TaskType } from "~/types";
-import {
-  fetchTasksFromLocalStorage,
-  formatDate,
-  saveTasksToLocalStorage,
-} from "~/utils";
+import { formatDate } from "~/utils";
 
 interface TaskProps {
   task: TaskType;
-  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
-  handleDelete: (id: number) => void;
 }
 
-const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
+const Task = ({ task }: TaskProps) => {
   const [isCompleted, setIsCompleted] = useState(task.status === "completed");
+  const submit = useSubmit();
 
   const handleCheckChange = () => {
     const newStatus: TaskType["status"] =
       task.status === "completed" ? "pending" : "completed";
+
     setIsCompleted(newStatus === "completed");
 
-    // fetching tasks form localStorage
-    const storedTasks = fetchTasksFromLocalStorage();
-
-    const updatedTasks = storedTasks.map((item: TaskType) =>
-      item.id === task.id ? { ...item, status: newStatus } : item
+    submit(
+      { taskId: task.id, status: newStatus },
+      { method: "post", action: `update-status/${task.id}` }
     );
+  };
 
-    setTasks(updatedTasks);
+  const handleDelete = (e: React.FormEvent) => {
+    const response = confirm("Please confirm you want to delete this task.");
 
-    // updating localStorage
-    saveTasksToLocalStorage("tasks", updatedTasks);
+    if (response) {
+      submit(task.id, { action: `delete/${task.id}`, method: "delete" });
+    }
+    e.preventDefault();
   };
 
   return (
@@ -63,9 +61,12 @@ const Task = ({ task, handleDelete, setTasks }: TaskProps) => {
             >
               <CiEdit size={25} />
             </Link>
+
+            {/* delete task */}
             <button
+              type="submit"
               className="hover:-translate-y-0.5 transition"
-              onClick={() => handleDelete(task.id)}
+              onClick={handleDelete}
             >
               <MdOutlineDelete size={25} className="text-red-500" />
             </button>
