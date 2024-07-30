@@ -6,9 +6,13 @@ import { BiLogOut } from "react-icons/bi";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
-import directus from "~/lib/directus";
+import { directusAuthClient } from "~/lib/directus";
 import { Filter, TaskType } from "~/types";
-import { filterTasks, getUserIdFromRequest } from "~/utils";
+import {
+  filterTasks,
+  getUserIdFromRequest,
+  getAccessTokenFromRequest,
+} from "~/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,9 +26,17 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserIdFromRequest(request);
+  const accessToken = await getAccessTokenFromRequest(request);
+  console.log("accessToken: ", accessToken)
+
+  if (!accessToken) {
+    return redirect("/login")
+  }
+
+  directusAuthClient.setToken(accessToken);
 
   try {
-    const tasks = await directus.request(
+    const tasks = await directusAuthClient.request(
       readItems("Tasks", {
         filter: {
           userId: {
@@ -34,7 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       })
     );
 
-    return tasks || [];
+    return (tasks as TaskType[]) || [];
   } catch (error) {
     console.log((error as Error).message);
     throw error;

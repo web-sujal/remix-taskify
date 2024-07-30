@@ -24,10 +24,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   try {
-    const res = await axios.post(
-      "https://tfr7um8q9v.tribecrafter.app/auth/login",
-      { email, password }
-    );
+    const res = await axios.post(`${process.env.DIRECTUS_URL}/auth/login`, {
+      email,
+      password,
+    });
 
     if (!res.data) {
       errors.invalidCredentials = "Invalid email or password";
@@ -37,10 +37,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const { access_token, refresh_token } = res.data.data;
 
     // Fetch user details
-    const user = await axios.get(
-      "https://tfr7um8q9v.tribecrafter.app/users/me",
-      { headers: { Authorization: `Bearer ${access_token}` } }
-    );
+    const user = await axios.get(`${process.env.DIRECTUS_URL}/users/me`, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
 
     if (!user.data) {
       errors.invalidCredentials = "Failed to fetch user details";
@@ -84,8 +83,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
     headers.append("Set-Cookie", await userIdCookie.serialize(userId));
 
-    // Redirect to a protected page after successful login
-    console.log("login successful");
     return redirect("/", { headers });
   } catch (error) {
     console.log("login failed");

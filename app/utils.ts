@@ -93,3 +93,12 @@ export const getUserIdFromRequest = async (request: Request) => {
   const userCookie = await createCookie("user_id").parse(cookieHeader);
   return userCookie || null;
 };
+
+// Get the access token from the request cookies
+export const getAccessTokenFromRequest = async (request: Request) => {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader) return null;
+
+  const userCookie = await createCookie("access_token").parse(cookieHeader);
+  return userCookie || null;
+};
