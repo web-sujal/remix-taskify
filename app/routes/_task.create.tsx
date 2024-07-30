@@ -6,10 +6,11 @@ import Header from "~/components/Header";
 import TaskForm from "~/components/TaskForm";
 import { addTask } from "~/lib/tasks.server";
 import { ErrorsType } from "~/types";
-import { validateInputs } from "~/utils";
+import { getUserIdFromRequest, validateInputs } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
+  const userId = await getUserIdFromRequest(request);
 
   const title = String(formData.get("title"));
   const description = String(formData.get("description"));
@@ -21,7 +22,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json(errors);
   }
 
-  await addTask({ title, description, dueDate });
+  await addTask({ title, description, dueDate, userId });
   return redirect("/");
 };
 

@@ -1,13 +1,14 @@
-import type { MetaFunction } from "@remix-run/node";
-import { json, Link, useLoaderData, useSubmit } from "@remix-run/react";
+import { readItems } from "@directus/sdk";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { Link, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 
 import Header from "~/components/Header";
 import Task from "~/components/Task";
-import { getTasks } from "~/lib/tasks.server";
+import directus from "~/lib/directus";
 import { Filter, TaskType } from "~/types";
-import { filterTasks } from "~/utils";
+import { filterTasks, getUserIdFromRequest } from "~/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,9 +20,25 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  const tasks = await getTasks();
-  return json(tasks);
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await getUserIdFromRequest(request);
+
+  try {
+    const tasks = await directus.request(
+      readItems("Tasks", {
+        filter: {
+          userId: {
+            _eq: userId,
+          },
+        },
+      })
+    );
+
+    return tasks || [];
+  } catch (error) {
+    console.log((error as Error).message);
+    throw error;
+  }
 };
 
 export default function Index() {
@@ -45,8 +62,9 @@ export default function Index() {
   const filteredTasks = search(filterTasks(tasks, filter));
 
   const handleLogout = async () => {
+    console.log("clicked logout");
     // update logic later when directus is active
-    submit({ just: "logout" }, { method: "post", action: "/logout" });
+    submit(null, { method: "post", action: "/logout" });
   };
 
   return (
@@ -106,7 +124,7 @@ export default function Index() {
             Sign up
           </Link>
           <button
-            className="flex gap-x-1 rounded-md bg-red-700 text-white px-4 py-3 hover:bg-red-800 disabled:cursor-not-allowed transition drop-shadow-xl w-full text-nowrap"
+            className="flex gap-x-1 rounded-md bg-red-700 z-30 text-white px-4 py-3 hover:bg-red-800 disabled:cursor-not-allowed transition drop-shadow-xl w-full text-nowrap"
             onClick={handleLogout}
           >
             Logout <BiLogOut size={20} className="text-white" />

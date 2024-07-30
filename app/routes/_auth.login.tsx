@@ -1,36 +1,96 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  createCookie,
+  json,
+  redirect,
+} from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
+import axios from "axios";
 
 import AuthForm from "~/components/AuthForm";
-import { directusAuthClient } from "~/lib/directus";
 import { AuthErrors } from "~/types";
 import { validateEmailAndPass } from "~/utils";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+
+  const email = String(formData.get("email"));
+  const password = String(formData.get("password"));
+
+  const errors: AuthErrors = validateEmailAndPass(email, password);
+
+  if (Object.keys(errors).length > 0) {
+    return json(errors);
+  }
+
   try {
-    const formData = await request.formData();
+    const res = await axios.post(
+      "https://tfr7um8q9v.tribecrafter.app/auth/login",
+      { email, password }
+    );
 
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
-
-    const errors: AuthErrors = validateEmailAndPass(email, password);
-
-    if (Object.keys(errors).length > 0) {
+    if (!res.data) {
+      errors.invalidCredentials = "Invalid email or password";
       return json(errors);
     }
 
-    const user = await directusAuthClient.login(email, password);
+    const { access_token, refresh_token } = res.data.data;
 
-    if (!user) {
-      errors.invalidCredentials = "Invalid user credentials";
+    // Fetch user details
+    const user = await axios.get(
+      "https://tfr7um8q9v.tribecrafter.app/users/me",
+      { headers: { Authorization: `Bearer ${access_token}` } }
+    );
+
+    if (!user.data) {
+      errors.invalidCredentials = "Failed to fetch user details";
       return json(errors);
     }
 
-    console.log(errors);
-    return redirect("/");
+    // console.log("user id: ", user.data.data);
+    const userId = user.data.data.id;
+
+    // Create cookies
+    const accessTokenCookie = createCookie("access_token", {
+      httpOnly: true,
+      secure: false, // TODO: change later when in production
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: "/",
+    });
+
+    const refreshTokenCookie = createCookie("refresh_token", {
+      httpOnly: true,
+      secure: false, // TODO: change later when in production
+      maxAge: 60 * 60 * 24 * 30, // 1 month
+      path: "/",
+    });
+
+    const userIdCookie = createCookie("user_id", {
+      httpOnly: true,
+      secure: false, // TODO: change later when in production
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: "/",
+    });
+
+    // Set cookies in headers
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      await accessTokenCookie.serialize(access_token)
+    );
+    headers.append(
+      "Set-Cookie",
+      await refreshTokenCookie.serialize(refresh_token)
+    );
+    headers.append("Set-Cookie", await userIdCookie.serialize(userId));
+
+    // Redirect to a protected page after successful login
+    console.log("login successful");
+    return redirect("/", { headers });
   } catch (error) {
+    console.log("login failed");
     console.log((error as Error).message);
-    return redirect("/login");
+    return json({ invalidCredentials: "Invalid credentials" } as AuthErrors);
   }
 };
 

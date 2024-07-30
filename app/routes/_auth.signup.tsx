@@ -1,4 +1,4 @@
-import { registerUser } from "@directus/sdk";
+import { createUser } from "@directus/sdk";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { json, redirect, useActionData } from "@remix-run/react";
 
@@ -20,12 +20,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   try {
-    await directus.request(registerUser(email, password));
+    await directus.request(
+      createUser({ email, password, role: process.env.USER_ROLE_ID })
+    );
 
-    return redirect("/");
+    return redirect("/login");
   } catch (error) {
+    console.log("signup failed");
     console.log((error as Error).message);
-    return redirect("/signup");
+    return json({
+      invalidCredentials: "Something went wrong. Please try again.",
+    } as AuthErrors);
   }
 };
 

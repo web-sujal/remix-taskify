@@ -1,4 +1,5 @@
 import { ErrorsType, TaskType, Filter, AuthErrors } from "./types";
+import { createCookie } from "@remix-run/node";
 
 export const isInvalidDueDate = (dueDate: string): boolean => {
   let currentDate = new Date().toISOString();
@@ -82,4 +83,13 @@ export const validateEmailAndPass = (email: string, password: string) => {
   }
 
   return {};
+};
+
+// Get the user ID from the request cookies
+export const getUserIdFromRequest = async (request: Request) => {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader) return null;
+
+  const userCookie = await createCookie("userId").parse(cookieHeader);
+  return userCookie || null;
 };
